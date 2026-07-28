@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}
+    Users
+{% endblock %}
+{% block content %}
+    {% include "shared/page_header.html" with page_title="Users" page_description="Manage system users." %}
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-end">
+            <a href="{% url 'accounts:user-create' %}" class="btn btn-primary">Add User</a>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.get_full_name }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.get_role_display }}</td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'accounts:user-update' user.pk %}"
+                                   class="btn btn-outline-primary btn-sm">Edit</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No users found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% include "shared/pagination.html" %}
+        </div>
+    </div>
+{% endblock %}

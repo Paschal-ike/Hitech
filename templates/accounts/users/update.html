@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}
+    Update User
+{% endblock %}
+{% block content %}
+    {% include "shared/page_header.html" with page_title="Update User" %}
+    <div class="card shadow-sm">
+        <div class="card-body">{% include "shared/forms/form.html" with submit_text="Save Changes" %}</div>
+    </div>
+{% endblock %}

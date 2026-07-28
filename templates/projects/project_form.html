@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}
+    {% if form.instance.pk %}Edit Project{% else %}Create Project{% endif %}
+{% endblock %}
+{% block content %}
+    <!-- Keeps the exact padding metrics as your list dashboard view -->
+    <div class="container pt-2 pb-5">
+        <!-- Contextual Breadcrumb Row -->
+        <div class="mb-4">
+            <a href="{% url 'projects:project-list' %}"
+               class="btn btn-sm btn-link link-secondary text-decoration-none p-0 mb-2 d-inline-flex align-items-center gap-1 small fw-medium">
+                <svg xmlns="http://w3.org"
+                     width="12"
+                     height="12"
+                     fill="currentColor"
+                     class="bi bi-arrow-left"
+                     viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
+                </svg>
+                Back to Projects
+            </a>
+            <h2 class="fw-bold text-dark mb-1 tracking-tight">
+                {% if form.instance.pk %}Modify Project Details{% else %}Create New Project{% endif %}
+            </h2>
+            <p class="text-secondary small mb-0">Configure your drone survey boundaries, parameters, and details.</p>
+        </div>
+        <!-- Removed the grid row wrapper to let the card span 100% of the container space -->
+        <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                {% include "shared/forms/form_errors.html" %}
+                <!-- Interior Grid Layout for fields inside the wide view -->
+                <div class="row g-3 mb-4">
+                    {% for field in form %}
+                        {% if field.name == 'project_code' %}
+                            <div class="col-md-3 col-lg-2">{% include "shared/forms/field.html" with field=field %}</div>
+                        {% elif field.name == 'status' %}
+                            <div class="col-md-4 col-lg-3">{% include "shared/forms/field.html" with field=field %}</div>
+                        {% elif field.name == 'description' or field.widget_type == 'textarea' %}
+                            <div class="col-12">{% include "shared/forms/field.html" with field=field %}</div>
+                        {% else %}
+                            <div class="col-md-6">{% include "shared/forms/field.html" with field=field %}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="border-top border-light-subtle pt-3">
+                    {% include "shared/forms/form_buttons.html" with cancel_url=projects_list_url submit_text="Save Project Information" %}
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}
+    Create Site
+{% endblock %}
+{% block content %}
+    {{ form.media }}
+    <div class="container pt-2 pb-5">
+        <div class="mb-4">
+            <a href="{% url 'projects:site-list' view.get_project.pk %}"
+               class="btn btn-sm btn-link link-secondary text-decoration-none p-0 mb-2 d-inline-flex align-items-center gap-1 small fw-medium">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="12"
+                     height="12"
+                     fill="currentColor"
+                     class="bi bi-arrow-left"
+                     viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
+                </svg>
+                Back to Sites
+            </a>
+            <h2 class="fw-bold text-dark mb-1">Register New Site</h2>
+            <p class="text-secondary small mb-0">
+                Establish a localized telemetry tracking point under project:
+                <strong>{{ view.get_project.name }}</strong>.
+            </p>
+        </div>
+        <div class="card border border-light-subtle shadow-sm rounded-3">
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        {% for field in form %}
+
+    {% if field.name == "coordinates" %}
+
+        <div class="col-12">
+            {% include "shared/maps/leaflet_picker.html" with field=field mode="point" %}
+        </div>
+
+    {% elif field.widget_type == "textarea" %}
+
+        <div class="col-12">
+            {% include "shared/forms/field.html" with field=field %}
+        </div>
+
+    {% else %}
+
+        <div class="col-md-6">
+            {% include "shared/forms/field.html" with field=field %}
+        </div>
+
+    {% endif %}
+
+{% endfor %}
+                    </div>
+                    <div class="border-top mt-4 pt-3">
+                        {% url "projects:site-list" view.get_project.pk as site_list_url %}
+                        {% include "shared/forms/form_buttons.html" with cancel_url=site_list_url submit_text="Create Site" %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}

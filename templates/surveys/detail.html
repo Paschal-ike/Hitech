@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    {% include "surveys/partials/survey_header.html" %}
+
+    {% include "surveys/partials/survey_summary_cards.html" %}
+
+    {% include "surveys/map_viewer.html" %}
+
+    {% include "surveys/model_viewer.html" %}
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            <!-- {% include "surveys/partials/processing_card.html" %} -->
+
+            {% include "surveys/partials/survey_information.html" %}
+
+        </div>
+
+        <div class="col-lg-4">
+
+            {% include "surveys/partials/workspace.html" %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% include "surveys/partials/processing_status.js.html" %}
+
+{% endblock %}

@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}
+Upload Deliverables
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+
+        <a
+            href="{% url 'surveys:survey-detail' survey.pk %}"
+            class="btn btn-link p-0 text-decoration-none mb-2">
+
+            ← Back to Survey
+
+        </a>
+
+        <h2 class="fw-bold">
+
+            Upload Survey Deliverables
+
+        </h2>
+
+        <p class="text-muted">
+
+            Upload a single ZIP archive containing your exported survey. The platform automatically detects every supported deliverable.
+
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <form
+                        id="upload-form"
+                        method="post"
+                        enctype="multipart/form-data">
+
+                        {% csrf_token %}
+
+                        {% include "shared/forms/field.html" with field=form.archive %}
+
+                        <div
+                            id="progress-wrapper"
+                            class="mt-4 d-none">
+
+                            <div class="d-flex justify-content-between">
+
+                                <strong id="progress-message">
+
+                                    Uploading...
+
+                                </strong>
+
+                                <span id="progress-percent">
+
+                                    0%
+
+                                </span>
+
+                            </div>
+
+                            <div
+                                class="progress mt-2"
+                                style="height:10px;">
+
+                                <div
+                                    id="progress-bar"
+                                    class="progress-bar progress-bar-striped progress-bar-animated"
+                                    style="width:0%;">
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="upload-error"
+                            class="alert alert-danger mt-4 d-none">
+
+                        </div>
+
+                        <div class="mt-4">
+
+                            <button
+                                id="submit-button"
+                                class="btn btn-primary">
+
+                                Upload Archive
+
+                            </button>
+
+                            <a
+                                href="{% url 'surveys:survey-detail' survey.pk %}"
+                                class="btn btn-outline-secondary">
+
+                                Cancel
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm mb-3">
+
+                <div class="card-header">
+
+                    Recommended Folder
+
+                </div>
+
+                <div class="card-body">
+
+<pre class="small mb-0">
+Survey Export.zip
+
+└── Survey Export/
+
+    orthomosaic.tif
+
+    dsm.tif
+
+    dtm.tif
+
+    pointcloud.laz
+
+    model.glb
+
+    mesh.obj
+
+    report.pdf
+
+    metadata.json
+
+    boundary.kml
+
+    polygons.geojson
+</pre>
+
+                </div>
+
+            </div>
+
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+
+                    Automatic Detection
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="small">
+
+                        ✔ Orthomosaic<br>
+                        ✔ DSM<br>
+                        ✔ DTM<br>
+                        ✔ Point Cloud<br>
+                        ✔ Mesh<br>
+                        ✔ 3D Model<br>
+                        ✔ Metadata<br>
+                        ✔ KML<br>
+                        ✔ GeoJSON
+
+                    </div>
+
+                    <hr>
+
+                    <small class="text-muted">
+
+                        You only upload once. The platform automatically prepares every available viewer.
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const form = document.getElementById("upload-form");
+const progress = document.getElementById("progress-wrapper");
+const progressBar = document.getElementById("progress-bar");
+const progressPercent = document.getElementById("progress-percent");
+const progressMessage = document.getElementById("progress-message");
+const error = document.getElementById("upload-error");
+const button = document.getElementById("submit-button");
+
+form.addEventListener("submit", function (e) {
+
+    e.preventDefault();
+
+    const file = form.querySelector("input[type=file]");
+
+    if (!file.files.length) {
+        return;
+    }
+
+    button.disabled = true;
+    progress.classList.remove("d-none");
+    error.classList.add("d-none");
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", window.location.href, true);
+
+    xhr.upload.onprogress = function (event) {
+
+        if (!event.lengthComputable) {
+            return;
+        }
+
+        const percent = Math.round(
+            (event.loaded / event.total) * 100
+        );
+
+        progressBar.style.width = percent + "%";
+        progressPercent.textContent = percent + "%";
+
+        if (percent < 100) {
+
+            progressMessage.textContent =
+                "Uploading archive...";
+
+        } else {
+
+            progressMessage.textContent =
+                "Upload complete. Finalizing upload...";
+
+        }
+    };
+
+    xhr.onload = function () {
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+
+            progressBar.style.width = "100%";
+            progressPercent.textContent = "100%";
+
+            progressMessage.textContent =
+                "Upload complete. Redirecting...";
+
+            window.location.replace(
+                "{% url 'surveys:survey-detail' survey.pk %}"
+            );
+
+            return;
+        }
+
+        showError("Upload failed.");
+    };
+
+    xhr.onerror = function () {
+        showError("Unable to reach the server.");
+    };
+
+    xhr.send(new FormData(form));
+
+});
+
+
+function showError(message) {
+
+    button.disabled = false;
+
+    progress.classList.add("d-none");
+
+    progressBar.style.width = "0%";
+    progressPercent.textContent = "0%";
+
+    progressMessage.textContent = "Uploading archive...";
+
+    error.textContent = message;
+    error.classList.remove("d-none");
+
+}
+
+</script>
+
+{% endblock %}

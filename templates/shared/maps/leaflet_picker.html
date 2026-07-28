@@ -1,0 +1,133 @@
+<div class="mb-3">
+
+    <label class="form-label fw-semibold">
+        {% if mode == "polygon" %}
+            Survey Boundary
+        {% else %}
+            Location on Map
+        {% endif %}
+        <span class="text-danger">*</span>
+    </label>
+
+    <div
+        id="leaflet-map"
+        class="border rounded"
+        style="height: 450px;">
+    </div>
+
+    {{ field }}
+
+    <div class="form-text">
+        {% if mode == "polygon" %}
+            Draw the survey boundary on the map.
+        {% else %}
+            Click anywhere on the map to select the site location.
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const input = document.getElementById("{{ field.id_for_label }}");
+    if (!input) return;
+
+    // --- FIX: Safely parse Django mode string into standard JS variables ---
+    const currentMode = "{{ mode }}"; 
+
+    const map = L.map("leaflet-map").setView([9.0820, 8.6753], 6);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    /*
+    |--------------------------------------------------------------------------
+    | POINT MODE (Sites)
+    |--------------------------------------------------------------------------
+    */
+    if (currentMode === "point") {
+        let marker = null;
+
+        if (input.value) {
+            const match = input.value.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+            if (match) {
+                const lng = parseFloat(match[1]);
+                const lat = parseFloat(match[2]);
+                marker = L.marker([lat, lng]).addTo(map);
+                map.setView([lat, lng], 15);
+            }
+        }
+
+        map.on("click", function (e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker(e.latlng).addTo(map);
+            input.value = `POINT(${e.latlng.lng} ${e.latlng.lat})`;
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | POLYGON MODE (Survey Boundary)
+    |--------------------------------------------------------------------------
+    */
+    if (currentMode === "polygon") {
+        const drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        const drawControl = new L.Control.Draw({
+            draw: {
+                polygon: {
+                    allowIntersection: false,
+                    showArea: true
+                },
+                polyline: false,
+                rectangle: false,
+                circle: false,
+                marker: false,
+                circlemarker: false
+            },
+            edit: {
+                featureGroup: drawnItems,
+                remove: true
+            }
+        });
+
+        map.addControl(drawControl);
+
+        map.on(L.Draw.Event.CREATED, function (event) {
+            drawnItems.clearLayers();
+            const layer = event.layer;
+            drawnItems.addLayer(layer);
+
+            const latlngs = layer.getLatLngs()[0];
+            let coordinates = latlngs.map(function (point) {
+                return `${point.lng} ${point.lat}`;
+            });
+
+            coordinates.push(coordinates[0]);
+            input.value = `POLYGON((${coordinates.join(",")}))`;
+        });
+
+        map.on(L.Draw.Event.EDITED, function () {
+            drawnItems.eachLayer(function (layer) {
+                const latlngs = layer.getLatLngs()[0];
+                let coordinates = latlngs.map(function (point) {
+                    return `${point.lng} ${point.lat}`;
+                });
+
+                coordinates.push(coordinates[0]);
+                input.value = `POLYGON((${coordinates.join(",")}))`;
+            });
+        });
+
+        map.on(L.Draw.Event.DELETED, function () {
+            input.value = "";
+        });
+    }
+
+});
+</script>

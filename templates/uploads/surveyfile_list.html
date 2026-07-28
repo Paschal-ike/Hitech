@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}
+Survey Files
+{% endblock %}
+
+{% block content %}
+
+<div class="container pt-2 pb-5">
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+
+        <div>
+
+            <a
+                href="{% url 'surveys:survey-detail' survey.pk %}"
+                class="btn btn-sm btn-link text-decoration-none p-0 mb-2">
+
+                ← Back to Survey
+
+            </a>
+
+            <h2 class="fw-bold mb-1">
+
+                Survey Files
+
+            </h2>
+
+            <p class="text-secondary mb-0">
+
+                {{ survey.name }}
+
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'uploads:file-upload' survey.pk %}"
+            class="btn btn-primary">
+
+            Upload Archive
+
+        </a>
+
+    </div>
+
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Total Files
+
+                    </small>
+
+                    <h4 class="mb-0">
+
+                        {{ files|length }}
+
+                    </h4>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Survey
+
+                    </small>
+
+                    <h6 class="mb-0">
+
+                        {{ survey.name }}
+
+                    </h6>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Project
+
+                    </small>
+
+                    <h6 class="mb-0">
+
+                        {{ survey.project.name }}
+
+                    </h6>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Site
+
+                    </small>
+
+                    <h6 class="mb-0">
+
+                        {{ survey.site.name }}
+
+                    </h6>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <span>
+
+                Uploaded Deliverables
+
+            </span>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Filename</th>
+
+                        <th>Type</th>
+
+                        <th>Size</th>
+
+                        <th>Upload</th>
+
+                        <th>Status</th>
+
+                        <th></th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for file in files %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+
+                                {{ file.original_filename }}
+
+                            </strong>
+
+                            <br>
+
+                            <small class="text-muted">
+
+                                {{ file.relative_path }}
+
+                            </small>
+
+                        </td>
+
+                        <td>
+
+                            {{ file.get_file_format_display }}
+
+                        </td>
+
+                        <td>
+
+                            {{ file.file_size }}
+
+                        </td>
+
+                        <td>
+
+                            {{ file.upload_session.get_upload_type_display }}
+
+                        </td>
+
+                        <td>
+
+                            {% if file.validation_passed %}
+
+                                <span class="badge bg-success">
+
+                                    Valid
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-danger">
+
+                                    Failed
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td class="text-end">
+
+                            <a
+                                href="{% url 'uploads:file-detail' file.pk %}"
+                                class="btn btn-sm btn-outline-primary">
+
+                                Details
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="text-center py-5">
+
+                            <h6 class="mb-2">
+
+                                No deliverables uploaded
+
+                            </h6>
+
+                            <p class="text-muted mb-3">
+
+                                Upload a 2D or 3D archive to begin processing.
+
+                            </p>
+
+                            <a
+                                href="{% url 'uploads:file-upload' survey.pk %}"
+                                class="btn btn-primary">
+
+                                Upload Archive
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

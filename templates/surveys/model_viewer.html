@@ -1,0 +1,133 @@
+<div class="card shadow-sm mb-4" id="model-viewer-card">
+
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <span>3D Model Viewer</span>
+        <select id="model-select" class="form-select form-select-sm w-auto d-none"></select>
+    </div>
+
+    <div class="card-body">
+        <div id="model-viewer-loading" class="text-muted small">Loading model data...</div>
+        <div id="model-viewer-empty" class="text-muted small d-none">No 3D model available for this survey.</div>
+        <div id="viewer-3d" class="d-none" style="height: 500px; border-radius: 6px; background: #1a1a1a;"></div>
+    </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { PLYLoader } from "three/addons/loaders/PLYLoader.js";
+
+const SURVEY_ID = "{{ survey.pk }}";
+const VIEWER_DATA_URL = "{% url 'surveys:survey-viewer-data' survey.pk %}";
+
+const loadingEl = document.getElementById("model-viewer-loading");
+const emptyEl = document.getElementById("model-viewer-empty");
+const containerEl = document.getElementById("viewer-3d");
+const select = document.getElementById("model-select");
+
+let three = null;
+let models = [];
+
+init();
+
+async function init() {
+    let data;
+    try {
+        const res = await fetch(VIEWER_DATA_URL);
+        data = await res.json();
+    } catch (err) {
+        loadingEl.textContent = "Could not load model data.";
+        return;
+    }
+
+    loadingEl.classList.add("d-none");
+    models = data.models || [];
+
+    if (!models.length) {
+        emptyEl.classList.remove("d-none");
+        return;
+    }
+
+    containerEl.classList.remove("d-none");
+
+    if (models.length > 1) {
+        select.classList.remove("d-none");
+        models.forEach((m, i) => {
+            const opt = document.createElement("option");
+            opt.value = i;
+            opt.textContent = `${m.name} (${m.format})`;
+            select.appendChild(opt);
+        });
+        select.addEventListener("change", () => showModel(models[select.value]));
+    }
+
+    three = initThreeScene();
+    showModel(models[0]);
+}
+
+function initThreeScene() {
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a1a);
+
+    const camera = new THREE.PerspectiveCamera(60, containerEl.clientWidth / containerEl.clientHeight, 0.1, 10000);
+    camera.position.set(5, 5, 5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(containerEl.clientWidth, containerEl.clientHeight);
+    containerEl.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    scene.add(new THREE.DirectionalLight(0xffffff, 0.6));
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    return { scene, camera, renderer, controls, currentObject: null };
+}
+
+function showModel(model) {
+    if (three.currentObject) {
+        three.scene.remove(three.currentObject);
+        three.currentObject = null;
+    }
+
+    const ext = model.url.split(".").pop().toLowerCase().split("?")[0];
+    const onLoaded = (object) => {
+        three.currentObject = object;
+        three.scene.add(object);
+    };
+
+    if (ext === "glb" || ext === "gltf") {
+        new GLTFLoader().load(model.url, (gltf) => onLoaded(gltf.scene));
+    } else if (ext === "obj") {
+        new OBJLoader().load(model.url, onLoaded);
+    } else if (ext === "ply") {
+        new PLYLoader().load(model.url, (geometry) => {
+            geometry.computeVertexNormals();
+            const isPointCloud = model.format === "point_cloud";
+            const material = isPointCloud
+                ? new THREE.PointsMaterial({ size: 0.01, vertexColors: geometry.hasAttribute("color") })
+                : new THREE.MeshStandardMaterial({ vertexColors: geometry.hasAttribute("color") });
+            onLoaded(isPointCloud ? new THREE.Points(geometry, material) : new THREE.Mesh(geometry, material));
+        });
+    } else {
+        console.warn("Unsupported 3D format for browser viewing:", ext, model.name);
+    }
+}
+</script>

@@ -1,0 +1,194 @@
+<div class="card shadow-sm">
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+
+        <span>Workspace</span>
+
+        <a
+            href="{% url 'uploads:file-upload' survey.pk %}"
+            class="btn btn-sm btn-primary">
+
+            Upload Deliverables
+
+        </a>
+
+    </div>
+
+    <div class="list-group list-group-flush">
+
+        <a
+            href="{% url 'uploads:file-list' survey.pk %}"
+            class="list-group-item list-group-item-action">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <strong>Uploaded Deliverables</strong>
+
+                    <div class="small text-muted">
+
+                        Browse every uploaded file.
+
+                    </div>
+
+                </div>
+
+                <i class="bi bi-folder2-open"></i>
+
+            </div>
+
+        </a>
+
+
+        <!-- 2D -->
+
+        <div class="list-group-item">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <strong>2D Deliverables</strong>
+
+                    <div class="small text-muted">
+
+                        Orthomosaic, DSM, DTM, GeoJSON, KML
+
+                    </div>
+
+                </div>
+
+                {% if survey.has_2d_viewer %}
+
+                    <span class="badge bg-success">
+                        Ready
+                    </span>
+
+                {% elif survey.processing_2d %}
+
+                    <span class="badge bg-warning text-dark">
+                        Processing
+                    </span>
+
+                {% elif survey.has_2d_upload %}
+
+                    <span class="badge bg-info">
+                        Uploaded
+                    </span>
+
+                {% else %}
+
+                    <span class="badge bg-secondary">
+                        Not Uploaded
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+            {% if survey.has_2d_viewer %}
+
+                <a
+                    href="{% url 'surveys:survey-2d-viewer' survey.pk %}"
+                    class="btn btn-success btn-sm mt-3">
+
+                    Open 2D Viewer
+
+                </a>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- 3D -->
+
+        <div class="list-group-item">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <strong>3D Deliverables</strong>
+
+                    <div class="small text-muted">
+
+                        Point Cloud, Meshes, Models
+
+                    </div>
+
+                </div>
+
+                {% if survey.has_3d_viewer %}
+
+                    <span class="badge bg-success">
+                        Ready
+                    </span>
+
+                {% elif survey.processing_3d %}
+
+                    <span class="badge bg-warning text-dark">
+                        Processing
+                    </span>
+
+                {% elif survey.has_3d_upload %}
+
+                    <span class="badge bg-info">
+                        Uploaded
+                    </span>
+
+                {% else %}
+
+                    <span class="badge bg-secondary">
+                        Not Uploaded
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+            {% if survey.has_3d_viewer %}
+
+                <a
+                    href="{% url 'surveys:survey-3d-viewer' survey.pk %}"
+                    class="btn btn-success btn-sm mt-3">
+
+                    Open 3D Viewer
+
+                </a>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="list-group-item">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <strong>Measurements</strong>
+
+                    <div class="small text-muted">
+
+                        Distance, area and elevation tools.
+
+                    </div>
+
+                </div>
+
+                <span class="badge bg-light text-dark">
+
+                    Coming Soon
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

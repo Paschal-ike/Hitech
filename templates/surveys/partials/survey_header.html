@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-between align-items-start mb-4">
+
+    <div>
+
+        <a
+            href="{% url 'surveys:survey-list' %}"
+            class="btn btn-sm btn-link p-0 text-decoration-none mb-2">
+
+            ← Back to Surveys
+
+        </a>
+
+        <h2 class="fw-bold mb-1">
+
+            {{ survey.name }}
+
+        </h2>
+
+        <p class="text-secondary mb-0">
+
+            {{ survey.project.name }}
+            /
+            {{ survey.site.name }}
+
+        </p>
+
+    </div>
+
+    {% include "surveys/partials/status_badge.html" with survey=survey %}
+
+</div>

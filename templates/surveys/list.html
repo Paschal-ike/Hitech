@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}
+Surveys
+{% endblock %}
+
+{% block content %}
+
+<div class="container pt-2 pb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <p class="text-uppercase text-secondary small mb-1">
+                Survey Management
+            </p>
+
+            <h2 class="fw-bold mb-1">
+                Surveys
+            </h2>
+
+            <p class="text-secondary mb-0">
+                Manage drone surveys and their deliverables.
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'surveys:survey-create' %}"
+            class="btn btn-dark">
+
+            New Survey
+
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Survey</th>
+
+                        <th>Project</th>
+
+                        <th>Site</th>
+
+                        <th>Date</th>
+
+                        <th>Status</th>
+
+                        <th></th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for survey in surveys %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>{{ survey.name }}</strong><br>
+
+                            <small class="text-muted">
+
+                                {{ survey.drone_model }}
+
+                            </small>
+
+                        </td>
+
+                        <td>{{ survey.project.name }}</td>
+
+                        <td>{{ survey.site.name }}</td>
+
+                        <td>{{ survey.survey_date }}</td>
+
+                        <td>
+
+                            {% include "surveys/partials/status_badge.html" with survey=survey %}
+
+                        </td>
+
+                        <td class="text-end">
+
+                            <a
+                                href="{% url 'surveys:survey-detail' survey.pk %}"
+                                class="btn btn-outline-primary btn-sm">
+
+                                Open Workspace
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6" class="text-center py-5">
+
+                            No surveys available.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

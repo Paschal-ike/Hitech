@@ -1,0 +1,46 @@
+<div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-3 mb-4">
+    <!-- Clean, tight vertical grid row alignment -->
+    <form method="get" class="row g-2 align-items-center">
+        <!-- Search Input Field -->
+        <div class="col-12 col-md-5 position-relative">
+            <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-secondary opacity-70">
+                <svg xmlns="http://w3.org"
+                     width="14"
+                     height="14"
+                     fill="currentColor"
+                     class="bi bi-search mb-0.5"
+                     viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                </svg>
+            </span>
+            <input type="text"
+                   name="search"
+                   value="{{ request.GET.search|default:'' }}"
+                   class="form-control ps-5 border-light-subtle rounded text-dark fs-6 fw-medium shadow-sm bg-white py-2"
+                   placeholder="Search entries by code, name, or metadata tags...">
+        </div>
+        <!-- Injection Point for Custom Extra Filter Dropdowns (Inherits correct select styles seamlessly) -->
+        {% block filters %}{% endblock %}
+        <!-- Action Buttons Layout Terminal -->
+        <div class="col-6 col-md-auto ms-md-auto">
+            <button class="btn btn-sm btn-dark d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 fw-medium shadow-sm w-100"
+                    type="submit">
+                <svg xmlns="http://w3.org"
+                     width="13"
+                     height="13"
+                     fill="currentColor"
+                     class="bi bi-funnel-fill"
+                     viewBox="0 0 16 16">
+                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.124.318l-3.992 4.99a1.5 1.5 0 0 0-.284.81v3.518a.5.5 0 0 1-.163.367l-2.5 2.5A.5.5 0 0 1 7 15.5v-4.66a1.5 1.5 0 0 0-.284-.81L2.724 5.038A.5.5 0 0 1 2.5 4.72v-3.22zm1 .5v1.28l4.032 5.04a2.5 2.5 0 0 1 .468 1.352v3.742l1-.999V9.672a2.5 2.5 0 0 1 .468-1.352L13.5 3.28V2z" />
+                </svg>
+                <span>Filter</span>
+            </button>
+        </div>
+        <div class="col-6 col-md-auto">
+            <a href="{{ request.path }}"
+               class="btn btn-sm btn-light border border-light-subtle fw-medium px-3 py-2 shadow-sm text-dark d-flex align-items-center justify-content-center w-100">
+                Reset
+            </a>
+        </div>
+    </form>
+</div>

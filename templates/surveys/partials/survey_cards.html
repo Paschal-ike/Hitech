@@ -1,0 +1,101 @@
+<div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+
+                    Survey Date
+
+                </small>
+
+                <h6 class="mb-0">
+
+                    {{ survey.survey_date }}
+
+                </h6>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+
+                    Pilot
+
+                </small>
+
+                <h6 class="mb-0">
+
+                    {{ survey.pilot|default:"—" }}
+
+                </h6>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+
+                    Drone
+
+                </small>
+
+                <h6 class="mb-0">
+
+                    {{ survey.drone_model|default:"—" }}
+
+                </h6>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card h-100">
+
+            <div class="card-body">
+
+                <small class="text-muted">
+
+                    Processing
+
+                </small>
+
+                <h6
+                    id="processing-status-text"
+                    class="mb-0">
+
+                    {{ survey.get_processing_status_display }}
+
+                </h6>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

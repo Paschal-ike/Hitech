@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}
+    {{ project.name }}
+{% endblock %}
+{% block content %}
+    <!-- Main Content Area with unified top-padding alignment -->
+    <div class="container pt-2 pb-5">
+        <!-- Consolidated Header Navigation Block -->
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4 pb-3 border-bottom border-light-subtle">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <a href="{% url 'projects:project-list' %}"
+                       class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 small fw-medium">
+                        <svg xmlns="http://w3.org"
+                             width="12"
+                             height="12"
+                             fill="currentColor"
+                             class="bi bi-arrow-left"
+                             viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
+                        </svg>
+                        Workspace
+                    </a>
+                    <span class="text-secondary opacity-50 small font-monospace">•</span>
+                    <span class="font-monospace fw-medium text-secondary bg-light px-1.5 py-0.5 border border-light-subtle rounded text-uppercase"
+                          style="font-size: 0.75rem">{{ project.project_code }}</span>
+                </div>
+                <h2 class="fw-bold text-dark mb-0 tracking-tight">{{ project.name }}</h2>
+            </div>
+            <a href="{% url 'projects:project-update' project.pk %}"
+               class="btn btn-sm btn-light border border-light-subtle fw-medium px-3 py-1.5 shadow-sm text-dark">
+                <svg xmlns="http://w3.org"
+                     width="14"
+                     height="14"
+                     fill="currentColor"
+                     class="bi bi-pencil-fill me-1"
+                     viewBox="0 0 16 16">
+                    <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
+                </svg>
+                Edit Settings
+            </a>
+        </div>
+        <!-- Layout Structural Grid -->
+        <div class="row g-4">
+            <!-- Left Side: Balanced Metadata Sheet -->
+            <div class="col-lg-8">
+                <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4">
+                    <h6 class="text-secondary text-uppercase fw-semibold font-monospace small tracking-wider mb-4 pb-2 border-bottom border-light-subtle">
+                        Overview Properties
+                    </h6>
+                    <div class="row g-4">
+                        <div class="col-sm-6">
+                            <div class="text-secondary small mb-1 font-monospace text-uppercase tracking-wider"
+                                 style="font-size: 0.7rem">Client Organization</div>
+                            <div class="fw-semibold text-dark">{{ project.client_name }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-secondary small mb-1 font-monospace text-uppercase tracking-wider"
+                                 style="font-size: 0.7rem">Operational Status</div>
+                            <div>
+                                {% if project.get_status_display == "Active" %}
+                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1 fw-medium small">Active</span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1 fw-medium small">{{ project.get_status_display }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-secondary small mb-1 font-monospace text-uppercase tracking-wider"
+                                 style="font-size: 0.7rem">Deployment Start</div>
+                            <div class="text-dark fw-medium">{{ project.start_date|default:"Not set" }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-secondary small mb-1 font-monospace text-uppercase tracking-wider"
+                                 style="font-size: 0.7rem">Target Completion</div>
+                            <div class="text-dark fw-medium">{{ project.end_date|default:"Not set" }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="text-secondary small mb-1 font-monospace text-uppercase tracking-wider"
+                                 style="font-size: 0.7rem">Project Workspace Boundaries Description</div>
+                            <div class="text-dark-emphasis small bg-light p-3 border border-light-subtle rounded lh-base">
+                                {{ project.description|default:"No supplemental descriptions registered for this workspace instance." }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Side: Action Control Pad -->
+            <div class="col-lg-4">
+                <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 mb-4">
+                    <h6 class="text-secondary text-uppercase fw-semibold font-monospace small tracking-wider mb-3 pb-2 border-bottom border-light-subtle">
+                        Telemetry Framework
+                    </h6>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="{% url 'projects:site-list' project.pk %}"
+                           class="btn btn-dark d-inline-flex align-items-center justify-content-center gap-2 py-2 fw-medium shadow-sm w-100">
+                            <svg xmlns="http://w3.org"
+                                 width="14"
+                                 height="14"
+                                 fill="currentColor"
+                                 class="bi bi-layers-half"
+                                 viewBox="0 0 16 16">
+                                <path d="M8.235 1.559a.5.5 0 0 0-.47 0L1.75 4.364a.5.5 0 0 0 0 .872l6.015 2.805a.5.5 0 0 0 .47 0l6.014-2.805a.5.5 0 0 0 0-.872zM1.571 8.114.5 8.614a.5.5 0 0 0 0 .872l6.015 2.805a.5.5 0 0 0 .47 0l6.015-2.805a.5.5 0 0 0 0-.872l-1.071-.5z" />
+                            </svg>
+                            <span>View Linked Sites</span>
+                        </a>
+                        <a href="{% url 'projects:site-create' project.pk %}"
+                           class="btn btn-light border border-light-subtle text-dark fw-medium py-2 w-100 d-inline-flex align-items-center justify-content-center gap-2 shadow-sm">
+                            <svg xmlns="http://w3.org"
+                                 width="14"
+                                 height="14"
+                                 fill="currentColor"
+                                 class="bi bi-plus-circle"
+                                 viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                            </svg>
+                            <span>Register New Site</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Danger Zone Terminal Context -->
+                <div class="card border border-danger-subtle bg-danger-subtle bg-opacity-10 rounded-3 p-4">
+                    <h6 class="text-danger text-uppercase fw-semibold font-monospace small tracking-wider mb-2">Danger Controls</h6>
+                    <p class="text-secondary small mb-3">Archiving hides this project matrix instance from the active pipelines.</p>
+                    <form method="post" action="{% url 'projects:project-status' project.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="ARCHIVED">
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger w-100 py-2 fw-medium bg-white">
+                            Archive Project Workspace
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

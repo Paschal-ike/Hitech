@@ -1,0 +1,22 @@
+{% if messages %}
+    <div class="toast-stack" aria-live="polite" aria-atomic="true">
+        {% for message in messages %}
+            <div class="toast auth-toast {% if message.tags %}auth-toast--{{ message.tags }}{% endif %}"
+                 role="alert"
+                 aria-live="assertive"
+                 aria-atomic="true">
+                <div class="toast-body-row">
+                    <i class="bi {% if message.tags == 'error' or message.tags == 'danger' %}bi-exclamation-triangle-fill {% elif message.tags == 'success' %}bi-check-circle-fill {% elif message.tags == 'warning' %}bi-exclamation-circle-fill {% else %}bi-info-circle-fill{% endif %}"
+                       aria-hidden="true"></i>
+                    <div class="toast-message">{{ message }}</div>
+                    <button type="button"
+                            class="toast-close"
+                            data-bs-dismiss="toast"
+                            aria-label="Dismiss">
+                        <i class="bi bi-x" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

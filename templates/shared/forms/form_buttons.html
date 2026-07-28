@@ -1,0 +1,9 @@
+<!-- components/form_actions.html -->
+<div class="d-flex align-items-center justify-content-end gap-2">
+    <a href="{{ cancel_url }}"
+       class="btn btn-sm btn-light border border-light-subtle fw-medium px-3 py-1.5 shadow-sm text-dark">Cancel</a>
+    <button type="submit"
+            class="btn btn-sm btn-dark d-inline-flex align-items-center gap-2 px-3 py-1.5 fw-medium shadow-sm">
+        {{ submit_text|default:"Save" }}
+    </button>
+</div>

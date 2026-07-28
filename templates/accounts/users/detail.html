@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}
+    User Details
+{% endblock %}
+{% block content %}
+    {% include "shared/page_header.html" with page_title="User Details" page_description="View user account information." %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">User Information</div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="220">Full Name</th>
+                            <td>{{ user_object.get_full_name|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Username</th>
+                            <td>{{ user_object.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>{{ user_object.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Role</th>
+                            <td>{{ user_object.get_role_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                {% if user_object.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Date Joined</th>
+                            <td>{{ user_object.date_joined }}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Login</th>
+                            <td>{{ user_object.last_login|default:"Never" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">Actions</div>
+                <div class="card-body d-grid gap-2">
+                    <a href="{% url 'accounts:user-update' user_object.pk %}"
+                       class="btn btn-primary">Edit User</a>
+                    <form method="post"
+                          action="{% url 'accounts:user-status-update' user_object.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden"
+                               name="is_active"
+                               value="{% if user_object.is_active %}false{% else %}true{% endif %}">
+                        <button type="submit"
+                                class="btn {% if user_object.is_active %}btn-danger{% else %}btn-success{% endif %} w-100">
+                            {% if user_object.is_active %}
+                                Deactivate User
+                            {% else %}
+                                Activate User
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% if latest_upload %}
+
+<script>
+
+const uploadSessionId = "{{ latest_upload.pk }}";
+
+const processingBadge = document.getElementById("processing-badge");
+const uploadStatus = document.getElementById("upload-status");
+const surveyStatus = document.getElementById("processing-status-text");
+
+const progressBar = document.getElementById("processing-progress-bar");
+const processingMessage = document.getElementById("processing-message");
+
+const viewer2d = document.getElementById("viewer-2d-link");
+const viewer3d = document.getElementById("viewer-3d-link");
+
+const viewer2dBadge = document.getElementById("viewer-2d-badge");
+const viewer3dBadge = document.getElementById("viewer-3d-badge");
+
+
+function enableViewers(){
+
+    viewer2d.classList.remove("disabled");
+    viewer3d.classList.remove("disabled");
+
+    viewer2d.removeAttribute("aria-disabled");
+    viewer3d.removeAttribute("aria-disabled");
+
+    viewer2dBadge.className = "badge bg-success float-end";
+    viewer3dBadge.className = "badge bg-success float-end";
+
+    viewer2dBadge.innerText = "Ready";
+    viewer3dBadge.innerText = "Ready";
+
+}
+
+
+function updateProgress(data){
+
+    uploadStatus.innerText = data.status;
+    surveyStatus.innerText = data.status;
+
+    switch(data.status){
+
+        case "STARTED":
+
+            processingBadge.className = "badge bg-primary";
+
+            processingBadge.innerText = "Queued";
+
+            progressBar.style.width = "5%";
+            progressBar.innerText = "Queued";
+
+            processingMessage.innerText =
+                "Upload complete. Waiting for background worker.";
+
+            break;
+
+
+        case "PROCESSING":
+
+            processingBadge.className =
+                "badge bg-warning text-dark";
+
+            processingBadge.innerText =
+                "Processing";
+
+            progressBar.style.width = "60%";
+            progressBar.innerText = "Processing";
+
+            processingMessage.innerText =
+                "Generating map tiles, validating files and preparing viewers.";
+
+            break;
+
+
+        case "COMPLETED":
+
+            processingBadge.className =
+                "badge bg-success";
+
+            processingBadge.innerText =
+                "Completed";
+
+            progressBar.classList.remove(
+                "progress-bar-animated"
+            );
+
+            progressBar.style.width = "100%";
+            progressBar.innerText = "Complete";
+
+            processingMessage.innerText =
+                "Processing finished successfully.";
+
+            enableViewers();
+
+            clearInterval(window.processingPolling);
+
+            break;
+
+
+        case "FAILED":
+
+            processingBadge.className =
+                "badge bg-danger";
+
+            processingBadge.innerText =
+                "Failed";
+
+            progressBar.classList.remove(
+                "progress-bar-animated"
+            );
+
+            progressBar.classList.add(
+                "bg-danger"
+            );
+
+            progressBar.style.width = "100%";
+            progressBar.innerText = "Failed";
+
+            processingMessage.innerText =
+                "Processing failed. Please inspect the upload logs.";
+
+            clearInterval(window.processingPolling);
+
+            break;
+
+    }
+
+}
+
+
+function pollProcessingStatus(){
+
+    fetch(`/uploads/api/upload-sessions/${uploadSessionId}/status/`)
+
+        .then(response => response.json())
+
+        .then(updateProgress)
+
+        .catch(error => console.error(error));
+
+}
+
+
+pollProcessingStatus();
+
+window.processingPolling = setInterval(
+
+    pollProcessingStatus,
+
+    3000
+
+);
+
+</script>
+
+{% endif %}

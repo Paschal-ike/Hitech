@@ -1,0 +1,13 @@
+{% extends "auth_base.html" %}
+{% block title %}
+    Login
+{% endblock %}
+{% block content %}
+    <div class="card auth-card">
+        <div class="card-body">
+            <h2>Welcome back</h2>
+            <p class="text-muted">Sign in to access your assigned projects</p>
+            {% include "shared/forms/form.html" with submit_text="Sign In" show_cancel=False %}
+        </div>
+    </div>
+{% endblock %}

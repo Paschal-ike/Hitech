@@ -1,0 +1,86 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="card shadow-sm mb-4" id="map-viewer-card">
+
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <span>2D Map Viewer</span>
+        <select id="orthomosaic-select" class="form-select form-select-sm w-auto d-none"></select>
+    </div>
+
+    <div class="card-body">
+        <div id="map-viewer-loading" class="text-muted small">Loading map data...</div>
+        <div id="map-viewer-empty" class="text-muted small d-none">No orthomosaic available for this survey.</div>
+        <div id="map-2d" class="d-none" style="height: 500px; border-radius: 6px;"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+(function () {
+    const SURVEY_ID = "{{ survey.pk }}";
+    const VIEWER_DATA_URL = "{% url 'surveys:survey-viewer-data' survey.pk %}";
+
+    const loadingEl = document.getElementById("map-viewer-loading");
+    const emptyEl = document.getElementById("map-viewer-empty");
+    const mapEl = document.getElementById("map-2d");
+    const select = document.getElementById("orthomosaic-select");
+
+    let map = null;
+    let currentTileLayer = null;
+    let orthomosaics = [];
+
+    init();
+
+    async function init() {
+        let data;
+        try {
+            const res = await fetch(VIEWER_DATA_URL);
+            data = await res.json();
+        } catch (err) {
+            loadingEl.textContent = "Could not load map data.";
+            return;
+        }
+
+        loadingEl.classList.add("d-none");
+        orthomosaics = data.orthomosaics || [];
+
+        if (!orthomosaics.length) {
+            emptyEl.classList.remove("d-none");
+            return;
+        }
+
+        mapEl.classList.remove("d-none");
+
+        if (orthomosaics.length > 1) {
+            select.classList.remove("d-none");
+            orthomosaics.forEach((o, i) => {
+                const opt = document.createElement("option");
+                opt.value = i;
+                opt.textContent = o.name;
+                select.appendChild(opt);
+            });
+            select.addEventListener("change", () => showOrthomosaic(orthomosaics[select.value]));
+        }
+
+        showOrthomosaic(orthomosaics[0]);
+    }
+
+    function showOrthomosaic(ortho) {
+        if (!map) {
+            map = L.map("map-2d").setView([0, 0], 2);
+        }
+        if (currentTileLayer) {
+            map.removeLayer(currentTileLayer);
+        }
+        currentTileLayer = L.tileLayer(ortho.tiles_url, { maxZoom: 20, noWrap: true }).addTo(map);
+
+        if (ortho.bounds) {
+            const b = ortho.bounds;
+            map.fitBounds([[b.south, b.west], [b.north, b.east]]);
+        }
+
+        requestAnimationFrame(() => map.invalidateSize());
+    }
+})();
+</script>

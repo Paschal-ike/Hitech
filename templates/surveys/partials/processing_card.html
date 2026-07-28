@@ -1,0 +1,333 @@
+<div class="card mb-4">
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+
+        <span>
+
+            Deliverable Processing
+
+        </span>
+
+        {% if latest_upload %}
+
+            <span
+                class="badge
+                {% if latest_upload.status == latest_upload.Status.PROCESSING %}
+                    bg-warning text-dark
+                {% elif latest_upload.status == latest_upload.Status.COMPLETED %}
+                    bg-success
+                {% elif latest_upload.status == latest_upload.Status.FAILED %}
+                    bg-danger
+                {% else %}
+                    bg-secondary
+                {% endif %}">
+
+                {{ latest_upload.get_status_display }}
+
+            </span>
+
+        {% endif %}
+
+    </div>
+
+    <div class="card-body">
+
+        {% if latest_upload %}
+
+            <p class="text-muted mb-4">
+
+                Files have been uploaded successfully. Each deliverable is processed independently and becomes available as soon as it is ready.
+
+            </p>
+
+            <table class="table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Deliverable</th>
+                        <th>Status</th>
+                        <th width="140">Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+
+                            Orthomosaic (2D)
+
+                        </td>
+
+                        <td>
+
+                            {% if survey.has_2d_viewer %}
+
+                                <span class="badge bg-success">
+
+                                    Ready
+
+                                </span>
+
+                            {% elif latest_upload.status == latest_upload.Status.PROCESSING %}
+
+                                <span class="badge bg-warning text-dark">
+
+                                    Processing
+
+                                </span>
+
+                            {% elif latest_upload.status == latest_upload.Status.FAILED %}
+
+                                <span class="badge bg-danger">
+
+                                    Failed
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    Not Uploaded
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if survey.has_2d_viewer %}
+
+                                <a
+                                    href="{% url 'surveys:survey-2d-viewer' survey.pk %}"
+                                    class="btn btn-sm btn-success">
+
+                                    Open
+
+                                </a>
+
+                            {% else %}
+
+                                <button
+                                    class="btn btn-sm btn-outline-secondary"
+                                    disabled>
+
+                                    Waiting
+
+                                </button>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            3D Model
+
+                        </td>
+
+                        <td>
+
+                            {% if survey.has_3d_viewer %}
+
+                                <span class="badge bg-success">
+
+                                    Ready
+
+                                </span>
+
+                            {% elif latest_upload.status == latest_upload.Status.PROCESSING %}
+
+                                <span class="badge bg-warning text-dark">
+
+                                    Processing
+
+                                </span>
+
+                            {% elif latest_upload.status == latest_upload.Status.FAILED %}
+
+                                <span class="badge bg-danger">
+
+                                    Failed
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    Not Uploaded
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if survey.has_3d_viewer %}
+
+                                <a
+                                    href="{% url 'surveys:survey-3d-viewer' survey.pk %}"
+                                    class="btn btn-sm btn-success">
+
+                                    Open
+
+                                </a>
+
+                            {% else %}
+
+                                <button
+                                    class="btn btn-sm btn-outline-secondary"
+                                    disabled>
+
+                                    Waiting
+
+                                </button>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            DSM
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-secondary">
+
+                                Pending
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            —
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            DTM
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-secondary">
+
+                                Pending
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            —
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            Point Cloud
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-secondary">
+
+                                Pending
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            —
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+            <div class="alert alert-light mb-0">
+
+                <strong>Latest Upload</strong><br>
+
+                Started:
+                {{ latest_upload.created_at|date:"M d, Y H:i" }}
+
+                {% if latest_upload.completed_at %}
+
+                    <br>
+
+                    Completed:
+                    {{ latest_upload.completed_at|date:"M d, Y H:i" }}
+
+                {% endif %}
+
+            </div>
+
+        {% else %}
+
+            <div class="text-center py-5">
+
+                <h5>
+
+                    No Deliverables Uploaded
+
+                </h5>
+
+                <p class="text-muted mb-0">
+
+                    Upload a survey archive to begin processing.
+
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>

@@ -1,0 +1,149 @@
+<div class="card mb-4">
+
+    <div class="card-header">
+
+        Survey Information
+
+    </div>
+
+    <div class="card-body">
+
+        <table class="table table-borderless mb-0">
+
+            <tbody>
+
+                <tr>
+
+                    <th width="220">
+
+                        Project
+
+                    </th>
+
+                    <td>
+
+                        {{ survey.project.name }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Site
+
+                    </th>
+
+                    <td>
+
+                        {{ survey.site.name }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Survey Date
+
+                    </th>
+
+                    <td>
+
+                        {{ survey.survey_date }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Pilot
+
+                    </th>
+
+                    <td>
+
+                        {{ survey.pilot|default:"—" }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Drone Model
+
+                    </th>
+
+                    <td>
+
+                        {{ survey.drone_model|default:"—" }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Coordinate Reference System
+
+                    </th>
+
+                    <td>
+
+                        {{ survey.coordinate_reference_system|default:"—" }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Description
+
+                    </th>
+
+                    <td>
+
+                        {{ survey.description|default:"No description provided." }}
+
+                    </td>
+
+                </tr>
+
+                <tr>
+
+                    <th>
+
+                        Notes
+
+                    </th>
+
+                    <td>
+
+                        {{ survey.notes|default:"No notes available." }}
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

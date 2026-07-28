@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ file.original_filename }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container pt-2 pb-5">
+
+    <div class="mb-4">
+
+        <a
+            href="{% url 'surveys:survey-detail' file.survey.pk %}"
+            class="btn btn-sm btn-link text-decoration-none p-0 mb-2">
+
+            ← Back to Survey
+
+        </a>
+
+        <h2 class="fw-bold">
+
+            {{ file.original_filename }}
+
+        </h2>
+
+    </div>
+
+    <div class="row">
+
+        <!-- Metadata -->
+
+        <div class="col-lg-8">
+
+            <div class="card border shadow-sm">
+
+                <div class="card-header">
+
+                    File Information
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <table class="table mb-0">
+
+                        <tbody>
+
+                            <tr>
+
+                                <th width="30%">File Type</th>
+
+                                <td>{{ file.get_file_format_display }}</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>Extension</th>
+
+                                <td>{{ file.extension }}</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>MIME Type</th>
+
+                                <td>{{ file.mime_type }}</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>File Size</th>
+
+                                <td>{{ file.file_size|filesizeformat }}</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>Checksum</th>
+
+                                <td>
+
+                                    <code>
+
+                                        {{ file.checksum }}
+
+                                    </code>
+
+                                </td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>Uploaded By</th>
+
+                                <td>
+
+                                    {{ file.uploaded_by }}
+
+                                </td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>Uploaded</th>
+
+                                <td>
+
+                                    {{ file.created_at }}
+
+                                </td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>Validation</th>
+
+                                <td>
+
+                                    {% if file.validation_passed %}
+
+                                        <span class="badge bg-success">
+
+                                            Passed
+
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-warning">
+
+                                            Pending
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <div class="card mt-4">
+
+                <div class="card-header">
+
+                    Metadata
+
+                </div>
+
+                <div class="card-body">
+
+                    <pre class="mb-0">{{ file.metadata|pprint }}</pre>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Actions -->
+
+        <div class="col-lg-4">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    Actions
+
+                </div>
+
+                <div class="card-body d-grid gap-2">
+
+                    {% if file.file_format == "ORTHOMOSAIC" %}
+
+                        <a
+                            href="#"
+                            class="btn btn-success">
+
+                            Open 2D Viewer
+
+                        </a>
+
+                    {% endif %}
+
+                    {% if file.file_format == "POINT_CLOUD" or file.file_format == "MODEL" or file.file_format == "MESH" %}
+
+                        <a
+                            href="#"
+                            class="btn btn-dark">
+
+                            Open 3D Viewer
+
+                        </a>
+
+                    {% endif %}
+
+                    <a
+                        href="{{ file.original_file.url }}"
+                        class="btn btn-outline-secondary"
+                        download>
+
+                        Download Original
+
+                    </a>
+
+                    {% if file.converted_file %}
+
+                        <a
+                            href="{{ file.converted_file.url }}"
+                            class="btn btn-outline-primary"
+                            download>
+
+                            Download Converted
+
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% if file.preview_image %}
+
+                <div class="card mt-4">
+
+                    <div class="card-header">
+
+                        Preview
+
+                    </div>
+
+                    <div class="card-body text-center">
+
+                        <img
+                            src="{{ file.preview_image.url }}"
+                            class="img-fluid rounded">
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

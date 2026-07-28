@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}
+Create Survey
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex align-items-center justify-content-between mb-5 pb-3 border-bottom">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a href="{% url 'surveys:survey-list' %}" class="text-decoration-none text-muted">Surveys</a></li>
+                    <li class="breadcrumb-item active fw-medium text-dark" aria-current="page">New Survey</li>
+                </ol>
+            </nav>
+            <h4 class="fw-bold text-dark m-0">Register New Drone Survey</h4>
+            <p class="text-secondary small m-0 mt-1">Configure your drone survey parameters and define its spatial coverage area.</p>
+        </div>
+        
+        <a href="{% url 'surveys:survey-list' %}" class="btn btn-light border btn-sm rounded-3 px-3">
+            <i class="bi bi-x-lg me-1 small"></i> Cancel
+        </a>
+    </div>
+
+    <!-- Form Workspace Grid Sheet -->
+    <div class="card border border-light-subtle shadow-sm rounded-4 bg-white p-4">
+        <div class="card-body p-2">
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="row g-4">
+                    {% for field in form %}
+
+                        {% if field.name == "boundary" %}
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-dark fw-semibold small mb-2">
+                                    Survey Boundary Area <span class="text-danger">*</span>
+                                </label>
+                                <div class="rounded-3 overflow-hidden border border-light-subtle shadow-sm">
+                                    {% include "shared/maps/leaflet_picker.html" with field=field mode="polygon" %}
+                                </div>
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block fw-medium mt-2">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                        {% elif field.widget_type == "textarea" %}
+                            <div class="col-12">
+                                {% include "shared/forms/field.html" with field=field %}
+                            </div>
+
+                        {% else %}
+                            <div class="col-md-6">
+                                {% include "shared/forms/field.html" with field=field %}
+                            </div>
+                        {% endif %}
+
+                    {% endfor %}
+                </div>
+
+                <!-- Form Control Action Row -->
+                <div class="d-flex align-items-center justify-content-end gap-3 mt-5 pt-4 border-top">
+                    {% url "surveys:survey-list" as survey_list_url %}
+                    {% include "shared/forms/form_buttons.html" with cancel_url=survey_list_url submit_text="Create Survey Workspace" %}
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Shared Placeholder Container for Dynamically Appended Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+    <div id="dynamicToastStack" class="toast-stack d-flex flex-column gap-2"></div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const projectSelect = document.getElementById("id_project");
+    const siteSelect = document.getElementById("id_site");
+
+    function showToast(message, type="info") {
+
+        const stack = document.querySelector(".toast-stack");
+
+        if (!stack) return;
+
+        const icons = {
+            success: "bi-check-circle-fill",
+            warning: "bi-exclamation-circle-fill",
+            danger: "bi-exclamation-triangle-fill",
+            error: "bi-exclamation-triangle-fill",
+            info: "bi-info-circle-fill",
+        };
+
+        const toast = document.createElement("div");
+
+        toast.className = `toast auth-toast auth-toast--${type}`;
+
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+
+        toast.innerHTML = `
+            <div class="toast-body-row">
+                <i class="bi ${icons[type] || icons.info}"></i>
+
+                <div class="toast-message">
+                    ${message}
+                </div>
+
+                <button
+                    type="button"
+                    class="toast-close"
+                    data-bs-dismiss="toast">
+
+                    <i class="bi bi-x"></i>
+
+                </button>
+            </div>
+        `;
+
+        stack.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast, {
+            delay: 4000
+        });
+
+        bsToast.show();
+
+        toast.addEventListener("hidden.bs.toast", () => {
+            toast.remove();
+        });
+
+    }
+
+    function resetSites(message="Select a project first") {
+
+        siteSelect.innerHTML = "";
+
+        siteSelect.appendChild(
+            new Option(message, "")
+        );
+
+        siteSelect.disabled = true;
+
+    }
+
+    async function loadSites(projectId) {
+
+        resetSites("Loading sites...");
+
+        try {
+
+            const response = await fetch(
+                `/projects/${projectId}/site-options/`
+            );
+
+            if (!response.ok)
+                throw new Error();
+
+            const sites = await response.json();
+
+            siteSelect.innerHTML = "";
+
+            if (!sites.length) {
+
+                resetSites("No sites available");
+
+                showToast(
+                    "This project does not have any registered sites.",
+                    "warning"
+                );
+
+                return;
+            }
+
+            siteSelect.appendChild(
+                new Option("Select a site", "")
+            );
+
+            sites.forEach(site => {
+
+                siteSelect.appendChild(
+
+                    new Option(
+                        site.name,
+                        site.id
+                    )
+
+                );
+
+            });
+
+            siteSelect.disabled = false;
+
+        }
+
+        catch {
+
+            resetSites("Unable to load sites");
+
+            showToast(
+                "Unable to load project sites.",
+                "danger"
+            );
+
+        }
+
+    }
+
+    // Initial page load
+
+    resetSites();
+
+    const initialProject = "{{ form.project.value|default:'' }}";
+    const initialSite = "{{ form.site.value|default:'' }}";
+
+    if (initialProject) {
+
+        loadSites(initialProject)
+            .then(() => {
+
+                if (initialSite)
+                    siteSelect.value = initialSite;
+
+            });
+
+    }
+
+    projectSelect.addEventListener("change", () => {
+
+        if (!projectSelect.value) {
+
+            resetSites();
+            return;
+
+        }
+
+        loadSites(projectSelect.value);
+
+    });
+
+});
+</script>
+
+{% endblock %}

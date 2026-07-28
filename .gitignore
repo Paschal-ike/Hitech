@@ -1,0 +1,37 @@
+# === Python Caches & Compiled Files ===
+__pycache__/
+*.py[cod]
+*$py.class
+
+# === Virtual Environments (Local dependencies) ===
+.venv/
+venv/
+ENV/
+env/
++env/
+
+# === Django Specifics ===
+# Local database (SQLite)
+*.sqlite3
+*.db
+
+# Media and Static directories (User uploads and built assets)
+media/
+
+static/
+staticfiles/
+
+# Sensitive environment variables / secrets
+.env
+.secrets
+*.env.json
+
+# === IDE & System Files ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# === Logs & Diagnostics ===
+*.log
+.pvt/

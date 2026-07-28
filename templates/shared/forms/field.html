@@ -1,0 +1,78 @@
+<div class="mb-3">
+    <!-- Form labels styled to exactly match your list page's table header text properties -->
+    <label for="{{ field.id_for_label }}"
+           class="form-label text-secondary text-uppercase fw-semibold font-monospace small tracking-wider mb-1">
+        {{ field.label }}
+        {% if field.field.required %}
+            <span class="text-danger">*</span>
+        {% endif %}
+    </label>
+    <div>
+        {% if field.widget_type == 'select' %}
+            <!-- Styled to use your clean custom select elements -->
+            {{ field }}
+            <script>
+                (function() {
+                    const el = document.getElementById("{{ field.id_for_label }}");
+                    el.className = "form-select border border-light-subtle rounded text-dark fs-6 fw-medium shadow-sm bg-white py-2";
+                })();
+            </script>
+        {% elif field.widget_type == 'checkbox' %}
+            <!-- Clean form checks -->
+            <div class="form-check mt-1">
+                {{ field }}
+                <script>
+                    (function() {
+                        const el = document.getElementById("{{ field.id_for_label }}");
+                        el.className = "form-check-input border border-light-subtle shadow-sm";
+                    })();
+                </script>
+                <label class="form-check-label small text-secondary"
+                       for="{{ field.id_for_label }}">Confirm selection</label>
+            </div>
+        {% elif field.name == 'coordinates' %}
+            <!-- Geometry/map widget (e.g. GeoDjango OSMWidget or similar): render as-is.
+                 Do NOT run the generic class-overwrite script below — it strips the
+                 classes/attrs the map JS relies on to size and initialize itself,
+                 which is what was causing the blank map area. -->
+            {{ field }}
+        {% else %}
+            <!-- Inputs style matched exactly to your 'Code' badge and font sizes -->
+            {{ field }}
+            <script>
+    (function() {
+        const fieldId = "{{ field.id_for_label }}";
+        const fieldName = "{{ field.name }}"; 
+        
+        const el = document.getElementById(fieldId);
+        if (el) {
+            el.className = "form-control border border-light-subtle rounded text-dark fs-6 fw-medium shadow-sm bg-white py-2";
+            
+          
+            if (fieldName === 'project_code' || fieldName === 'site_code') {
+                el.classList.add('font-monospace', 'text-uppercase');
+            }
+        }
+    })();
+</script>
+
+        {% endif %}
+    </div>
+    <!-- Validation States -->
+    {% if field.errors %}
+        <script>
+            (function() {
+                const el = document.getElementById("{{ field.id_for_label }}");
+                el.classList.add('is-invalid');
+                el.classList.remove('border-light-subtle');
+            })();
+        </script>
+        {% for error in field.errors %}
+            <div class="invalid-feedback d-block small mt-1 font-monospace fw-medium">{{ error }}</div>
+        {% endfor %}
+    {% endif %}
+    <!-- Help text matching secondary small style metrics -->
+    {% if field.help_text %}
+        <div class="form-text text-secondary small mt-1 opacity-75">{{ field.help_text }}</div>
+    {% endif %}
+</div>

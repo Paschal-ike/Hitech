@@ -1,0 +1,42 @@
+{% if page_obj.has_other_pages %}
+    <nav aria-label="Project navigation matrix" class="mt-4">
+        <ul class="pagination pagination-sm justify-content-center gap-1">
+            <!-- Previous Button Link -->
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link border-light-subtle rounded text-dark px-3"
+                       href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link border-light-subtle rounded bg-light opacity-50 px-3">Previous</span>
+                </li>
+            {% endif %}
+            <!-- Numbered Navigation Matrix Loop -->
+            {% for page in page_obj.paginator.page_range %}
+                {% if page == page_obj.number %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link bg-dark border-dark text-white rounded px-2.5 fw-semibold">{{ page }}</span>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <!-- Swapped out query_transform for direct native page parameter query -->
+                        <a class="page-link border-light-subtle text-dark rounded px-2.5"
+                           href="?page={{ page }}">{{ page }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            <!-- Next Button Link -->
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link border-light-subtle rounded text-dark px-3"
+                       href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link border-light-subtle rounded bg-light opacity-50 px-3">Next</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}

@@ -185,27 +185,21 @@ def create_survey_file(
     )
 
 
-def get_upload_session_status(
-    *,
-    upload_session_id,
-):
-    upload_session = UploadSession.objects.select_related(
-        "survey",
-    ).get(
-        pk=upload_session_id,
-    )
-
+# uploads/services.py
+def get_upload_session_status(*, upload_session_id):
+    upload_session = UploadSession.objects.select_related("survey").get(pk=upload_session_id)
     survey = upload_session.survey
 
     return {
         "status": upload_session.status,
         "status_display": upload_session.get_status_display(),
-        "viewer_2d_ready": bool(survey.tile_directory),
+        "progress": upload_session.progress,
+        "processed_files": upload_session.processed_files,
+        "total_files": upload_session.total_files,
+        "viewer_2d_ready": survey.has_2d_viewer,
         "viewer_3d_ready": survey.has_3d_viewer,
-        "processing_complete": (
-            upload_session.status == UploadSession.Status.COMPLETED
-        ),
-        "processing_failed": (upload_session.status == UploadSession.Status.FAILED),
+        "processing_complete": upload_session.status == UploadSession.Status.COMPLETED,
+        "processing_failed": upload_session.status == UploadSession.Status.FAILED,
     }
 
 

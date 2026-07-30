@@ -1,8 +1,7 @@
 from django.conf import settings
 from django.contrib.gis.db import models
 
-from core.models import TimeStampedModel, UUIDModel, CreatedByModel
-from surveys.models import Survey
+from core.models import TimeStampedModel, UUIDModel
 
 
 class UploadSession(UUIDModel, TimeStampedModel):
@@ -11,9 +10,10 @@ class UploadSession(UUIDModel, TimeStampedModel):
         PROCESSING = "PROCESSING", "Processing"
         COMPLETED = "COMPLETED", "Completed"
         FAILED = "FAILED", "Failed"
+        COMPLETED_WITH_ERRORS = "COMPLETED_WITH_ERRORS", "Completed with errors"
 
     survey = models.ForeignKey(
-        Survey,
+        "surveys.Survey",
         on_delete=models.CASCADE,
         related_name="upload_sessions",
     )
@@ -25,7 +25,7 @@ class UploadSession(UUIDModel, TimeStampedModel):
     )
 
     status = models.CharField(
-        max_length=20,
+        max_length=50,
         choices=Status.choices,
         default=Status.PROCESSING,
         db_index=True,
@@ -50,6 +50,8 @@ class UploadSession(UUIDModel, TimeStampedModel):
         null=True,
         blank=True,
     )
+    total_files = models.PositiveSmallIntegerField(default=0)
+    processed_files = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         db_table = "uploads_upload_session"
@@ -78,7 +80,7 @@ class SurveyFile(UUIDModel, TimeStampedModel):
         FAILED = "failed"
 
     survey = models.ForeignKey(
-        Survey,
+        "surveys.Survey",
         on_delete=models.CASCADE,
         related_name="files",
     )
@@ -145,6 +147,8 @@ class SurveyFile(UUIDModel, TimeStampedModel):
     error_message = models.TextField(blank=True, default="")
     tile_directory = models.CharField(max_length=255, blank=True, default="")
     tile_bounds = models.JSONField(null=True, blank=True)
+    model_path = models.CharField(max_length=255, blank=True, default="")
+    point_cloud_directory = models.CharField(max_length=255, blank=True, default="")
 
     metadata = models.JSONField(
         default=dict,
@@ -165,49 +169,3 @@ class SurveyFile(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return self.original_filename
-
-    @property
-    def has_2d_upload(self):
-        return self.files.filter(
-            file_format__in=[
-                SurveyFile.FileFormat.ORTHOMOSAIC,
-                SurveyFile.FileFormat.DSM,
-                SurveyFile.FileFormat.DTM,
-                SurveyFile.FileFormat.KML,
-                SurveyFile.FileFormat.GEOJSON,
-            ]
-        ).exists()
-
-    @property
-    def has_3d_upload(self):
-        return self.files.filter(
-            file_format__in=[
-                SurveyFile.FileFormat.MODEL,
-                SurveyFile.FileFormat.MESH,
-                SurveyFile.FileFormat.POINT_CLOUD,
-            ]
-        ).exists()
-
-    @property
-    def has_2d_viewer(self):
-        return bool(self.tile_directory)
-
-    @property
-    def has_3d_viewer(self):
-        return bool(self.model_directory)
-
-    @property
-    def processing_2d(self):
-        return (
-            self.has_2d_upload
-            and not self.has_2d_viewer
-            and self.processing_status == self.ProcessingStatus.PROCESSING
-        )
-
-    @property
-    def processing_3d(self):
-        return (
-            self.has_3d_upload
-            and not self.has_3d_viewer
-            and self.processing_status == self.ProcessingStatus.PROCESSING
-        )

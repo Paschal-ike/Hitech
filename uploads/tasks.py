@@ -1,6 +1,6 @@
 from celery import shared_task, group, chord
 import logging
-
+from django.db.models import F
 from .models import SurveyFile, UploadSession
 from surveys.models import Survey
 from .processors import import_zip_archive, process_uploaded_file
@@ -40,6 +40,12 @@ def process_upload_session_task(upload_session_id):
     if not imported_files:
         _mark_session_failed(upload_session, survey, "No supported files found.")
         return
+    
+    upload_session.total_files = len(imported_files)
+    upload_session.processed_files = 0
+    upload_session.current_step = f"Processing 0/{len(imported_files)} files..."
+    upload_session.save(update_fields=["total_files", "processed_files", "current_step"])
+
 
     file_tasks = group(process_survey_file_task.s(f.pk) for f in imported_files)
     chord(file_tasks)(
@@ -63,12 +69,31 @@ def process_survey_file_task(self, survey_file_id):
             status=SurveyFile.Status.FAILED,
             error_message=str(exc)[:500],
         )
+        _bump_session_progress(survey_file_id)
         return {"id": survey_file_id, "ok": False}
 
     survey_file.status = SurveyFile.Status.COMPLETED
     survey_file.save(update_fields=["status"])
+    _bump_session_progress(survey_file_id)
     return {"id": survey_file_id, "ok": True}
 
+
+def _bump_session_progress(survey_file_id):
+    session_id = SurveyFile.objects.values_list(
+        "upload_session_id", flat=True
+    ).get(pk=survey_file_id)
+
+    UploadSession.objects.filter(pk=session_id).update(
+        processed_files=F("processed_files") + 1
+    )
+
+    session = UploadSession.objects.only("processed_files", "total_files").get(pk=session_id)
+    if session.total_files:
+        pct = int(session.processed_files / session.total_files * 100)
+        UploadSession.objects.filter(pk=session_id).update(
+            progress=pct,
+            current_step=f"Processed {session.processed_files}/{session.total_files} files",
+        )
 
 @shared_task
 def finalize_upload_session_task(results, upload_session_id):
@@ -99,7 +124,11 @@ def finalize_upload_session_task(results, upload_session_id):
         if status == UploadSession.Status.FAILED
         else Survey.ProcessingStatus.COMPLETED
     )
-    survey.status = Survey.Status.READY
+    survey.status = (
+        Survey.Status.READY
+        if status != UploadSession.Status.FAILED
+        else survey.status 
+    )
     survey.save(update_fields=["processing_status", "status"])
 
 

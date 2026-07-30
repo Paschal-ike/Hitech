@@ -3,7 +3,7 @@ from django.contrib.gis.db import models
 
 from core.models import CreatedByModel, TimeStampedModel, UUIDModel
 from projects.models import Project, Site
-
+from uploads.models import SurveyFile
 
 class Survey(UUIDModel, TimeStampedModel, CreatedByModel):
     class Status(models.TextChoices):
@@ -138,11 +138,21 @@ class Survey(UUIDModel, TimeStampedModel, CreatedByModel):
 
     @property
     def has_2d_viewer(self):
-        return bool(self.tile_directory)
+        return self.files.filter(
+            status=SurveyFile.Status.COMPLETED,
+            file_format=SurveyFile.FileFormat.ORTHOMOSAIC,
+        ).exists()
 
     @property
     def has_3d_viewer(self):
-        return bool(self.model_directory)
+        return self.files.filter(
+            status=SurveyFile.Status.COMPLETED,
+            file_format__in=[
+                SurveyFile.FileFormat.MODEL,
+                SurveyFile.FileFormat.MESH,
+                SurveyFile.FileFormat.POINT_CLOUD,
+            ],
+        ).exists()
 
 
 class Measurement(UUIDModel, TimeStampedModel, CreatedByModel):
